@@ -25,52 +25,34 @@ class DataModel {
     
     func manageItemIds(item: ChecklistItem) -> Int {
         for item in itemIDs {
-            
-            
             if !itemIDs.contains(item) {
                 itemIDs.append(item)
-                
             }
-           
         }
-        
          return itemIDs.count
-        
-        
     }
     
-    
     func totalCompleteItems() -> Int {
-        
         for checklist in lists where checklist.items.count > 0 {
-            
             for item in checklist.items where item.checked {
             print("Count before: \(totalItemsCompleted)")
-                
-               
                 totalItemsCompleted += 1
                  print("Count before: \(totalItemsCompleted)")
             }
- 
         }
         return totalItemsCompleted
     }
     
-    
     func nextDueItem() -> [ChecklistItem]{
        var allitems = [ChecklistItem]()
         // sort items by due date
-     
         for list in lists {
             let items = list.items
             for item in items where item.checked == false {
                 allitems.append(item)
             }
-            
         }
-        
        return allitems.sorted { $0.dueDate < $1.dueDate }
-        
     }
 
 
@@ -116,7 +98,7 @@ class DataModel {
         let archiver = NSKeyedArchiver(forWritingWith: data)
         // this line is different from before
         archiver.encode(lists, forKey: "Checklists")
-        archiver.encode(totalItemsCompleted, forKey: "TotalItemsCompleted")
+     archiver.encode(totalItemsCompleted, forKey: "TotalItemsCompleted")
         archiver.finishEncoding()
         data.write(to: dataFilePath(), atomically: true)
     }
@@ -128,7 +110,8 @@ class DataModel {
             let unarchiver = NSKeyedUnarchiver(forReadingWith: data)
             // this line is different from before
             lists = unarchiver.decodeObject(forKey: "Checklists") as! [Checklist]
-            totalItemsCompleted = unarchiver.decodeObject(forKey: "TotalItemsCompleted") as! Int
+            //totalItemsCompleted = unarchiver.decodeObject(forKey: "TotalItemsCompleted") as! Int
+            totalItemsCompleted = unarchiver.decodeInteger(forKey: "TotalItemsCompleted")
             unarchiver.finishDecoding()
             sortChecklists()
         }

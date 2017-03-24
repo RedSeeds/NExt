@@ -31,16 +31,8 @@ UITextFieldDelegate {
     var selectedIconName = ""
     var photoTaken = false
     var photoSelected = false
-    
+    var animate = true // tells the controller to only animate upon first view once user is edditing, to avoid over animations
 
-    // test for animation of dials
-    
-    
-   
-    
-    
-    // Set in tableviewdidSetlect to tell UIImage picker methods which thumnail to populate for preview
-    
     // Outlets
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var doneBarButton: UIBarButtonItem!
@@ -92,24 +84,28 @@ UITextFieldDelegate {
     // Sets "selectedIconImage variable to the clicked view in Icon views
     @IBAction func selectIconButton(_ sender: Any) {
         
+        // stops the animations after the first set up
+        self.animate = false
         if sender as! UIButton == leftIconViewButton {
             UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.6, options: .curveEaseInOut, animations: {
+                
+                
+               
                 self.leftIconXConstraint.constant = -self.topIconDiplayView.frame.height - 20
                 
-              
                 self.view.layoutIfNeeded()
                 
             }, completion: nil)
             takePhoto()
             
         }else if sender as! UIButton == centerIconImageButton {
-        
+       
             self.leftIconBottom.constant = self.topIconDiplayView.frame.height + 20
             
             
         }else if sender as! UIButton == rightIconViewButton {
             pickPhoto()
-            
+           
             self.rightIconXConstraint.constant = 120
         }
     }
@@ -209,44 +205,47 @@ UITextFieldDelegate {
         // Sets text feild to first responder, meaning places curser in filed and shows keypad
         textField.becomeFirstResponder()
         
+        if animate {
         self.transformView(view: self.leftIconView, size: 0)
         self.transformView(view: self.rightIconView, size: 0)
         self.transformView(view: self.centerIconView, size: 0)
        self.transformView(view: textFieldView, size: 0.2)
-        
+        }
         
     }
     
     override func viewDidAppear(_ animated: Bool) {
         
+        if animate {
+            UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.6, options: .curveEaseInOut, animations: {
+                
+                self.textFieldView.transform = CGAffineTransform.identity
+                self.view.layoutIfNeeded()
+                
+                
+            }, completion: nil)
+            
+            
+            UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.6, options: .curveEaseInOut, animations: {
+                
+                // animates imageviews upon appearing
+                self.transformView(view: self.leftIconView, size: 1.3)
+                self.transformView(view: self.rightIconView, size: 1.3)
+                self.transformView(view: self.centerIconView, size: 1.3)
+                self.transformView(view: self.topIconDiplayView, size: 1)
+                
+                self.leftIconXConstraint.constant = -self.topIconDiplayView.frame.width - 20
+                
+                self.centerIconBottom.constant = 150
+                self.rightIconXConstraint.constant = self.topIconDiplayView.frame.height + 20
+                
+                
+                self.view.layoutIfNeeded()
+                
+                
+            }, completion: nil)
+        }
         
-        UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.6, options: .curveEaseInOut, animations: {
-            
-                       self.textFieldView.transform = CGAffineTransform.identity
-            self.view.layoutIfNeeded()
-            
-            
-        }, completion: nil)
-        
-        
-        UIView.animate(withDuration: 0.5, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.6, options: .curveEaseInOut, animations: {
-            
-            // animates imageviews upon appearing
-            self.transformView(view: self.leftIconView, size: 1.3)
-            self.transformView(view: self.rightIconView, size: 1.3)
-            self.transformView(view: self.centerIconView, size: 1.3)
-            self.transformView(view: self.topIconDiplayView, size: 1)
-            
-            self.leftIconXConstraint.constant = -self.topIconDiplayView.frame.width - 20
-            
-            self.centerIconBottom.constant = 150
-            self.rightIconXConstraint.constant = self.topIconDiplayView.frame.height + 20
-          
-      
-            self.view.layoutIfNeeded()
-            
-            
-        }, completion: nil)
         
         if photoTaken {
             wantToSave()

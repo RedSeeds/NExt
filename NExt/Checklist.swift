@@ -18,7 +18,7 @@ class Checklist: NSObject, NSCoding {
     //var itemIDs = [Int]()
     
     convenience init(name: String) {
-        self.init(name: name, iconImage: UIImage(named: "Empty-Smilly")! )
+        self.init(name: name, iconImage: UIImage(named: "No Icon")! )
     }
     
     init(name: String, iconImage: UIImage) {

@@ -1,27 +1,27 @@
  //
-//  AllListsViewController.swift
-//  NExt
-//
-//  Created by Douglas Sexton on 2/19/17.
-//  Copyright © 2017 Douglas Sexton. All rights reserved.
-//
-
-import Foundation
-import UIKit
-
-
-protocol ButtonCellDelegate {
+ //  AllListsViewController.swift
+ //  NExt
+ //
+ //  Created by Douglas Sexton on 2/19/17.
+ //  Copyright © 2017 Douglas Sexton. All rights reserved.
+ //
+ 
+ import Foundation
+ import UIKit
+ 
+ 
+ protocol ButtonCellDelegate {
     func cellTapped(cell: UIButton)
-}
-
-class AllListsViewController: UITableViewController {
+ }
+ 
+ class AllListsViewController: UITableViewController {
     
     // Variables
-    var progressPercentage: CGFloat = 0
     var dataModel: DataModel!
-    var allItems: [ChecklistItem] = []
-    var checklistWithNextDueItem: Checklist?
-    var nextDueItem: ChecklistItem?
+    var listCount = 0
+      var compeltedItems: Int = 0
+    var indexOfIemEdited: Int?
+
     
     // Outlets
     @IBOutlet var headerView: UIView!
@@ -32,8 +32,6 @@ class AllListsViewController: UITableViewController {
     @IBOutlet weak var nextDueItemButton: UIButton!
     @IBOutlet weak var starImage: UIImageView!
     @IBOutlet weak var starLabel: UILabel!
-    var compeltedItems: Int = 0
-    
     @IBOutlet weak var circleView: UIView!
     
     // button action to show next due item in headerview
@@ -41,12 +39,12 @@ class AllListsViewController: UITableViewController {
         // 1 grab checklist from dataModel
         for checklist in dataModel.lists {
             let items = checklist.items
-        
-        // 2 search through checklistItems for the next due item by calling the DataModel function that returns the first item in the sorted array containing all due items by date
+            
+            // 2 search through checklistItems for the next due item by calling the DataModel function that returns the first item in the sorted array containing all due items by date
             for checklistitem in items {
                 if checklistitem == dataModel.nextDueItem().first {
-                 
-        // 3 call segue and pass checklist containing the next due item. THis is done to give the delegete access to all properties on the checklistItem
+                    
+                    // 3 call segue and pass checklist containing the next due item. THis is done to give the delegete access to all properties on the checklistItem
                     performSegue(withIdentifier: "ShowChecklist", sender: checklist)
                 }
             }
@@ -59,6 +57,7 @@ class AllListsViewController: UITableViewController {
         if segue.identifier == "ShowChecklist" {
             let controller = segue.destination as! ChecklistViewController
             controller.checklist = sender as! Checklist
+            indexOfIemEdited = nil
             
             // 2 sets the destination delegate to self and sets the checklistItem to nil, informing the segue destination VC to add an item when complete
         }  else if segue.identifier == "AddChecklit" {
@@ -66,7 +65,8 @@ class AllListsViewController: UITableViewController {
             let controller = navigationController.topViewController as! ListDetailViewController
             controller.delegate = self
             controller.checklistToEdit = nil
-          
+            indexOfIemEdited = nil
+            
             // 3 passes the checklist item to eddit, also serves as a means to navigate to the last item presented when the app was terminated. This is a conviencne method helping the user to quickly access the last state and location
         }else if segue.identifier == "EditChecklist" {
             
@@ -74,6 +74,7 @@ class AllListsViewController: UITableViewController {
             let index = dataModel.indexOfSelectedChecklist // change this
             if index >= 0 && index < dataModel.lists.count {
                 let checklist = dataModel.lists[index]
+                indexOfIemEdited = nil
                 performSegue(withIdentifier: "ShowChecklist", sender: checklist)
             }
         }
@@ -81,6 +82,8 @@ class AllListsViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        listCount = dataModel.lists.count
         
         
         // circle view: stress head
@@ -99,10 +102,10 @@ class AllListsViewController: UITableViewController {
     }
     
     // HELPERS
-// updates the star Image animation and label tex
+    // updates the star Image animation and label tex
     
     func updateStarLabel() {
-
+        
         UIView.animate(withDuration: 0.3, delay: 0.0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.6, options: .curveEaseInOut, animations: {
             
             
@@ -120,25 +123,25 @@ class AllListsViewController: UITableViewController {
             self.view.layoutIfNeeded()
             
         }, completion: nil)
-    
+        
         
         starLabel.text = String(dataModel.totalCompleteItems())
         /*
-        for checklist in dataModel.lists where checklist.items.count > 0 {
-        
-        for item in checklist.items where item.checked {
-            count += 1
-            
-        }
-        starLabel.text = String(count)
-        */
+         for checklist in dataModel.lists where checklist.items.count > 0 {
+         
+         for item in checklist.items where item.checked {
+         count += 1
+         
+         }
+         starLabel.text = String(count)
+         */
     }
     // HEADER************, contains labels that display the next due item by date, also includes a button to segue to the next due item currently being displayed
     
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         // header is sized to occupy 10% of the view hight to account for multiple size devices. This is set this way due to the fact the header contains text that can be displayed on a larger scale. Labels are not currently set to increase with size as this version supports only iPhone
-       
-        return 100
+        
+        return self.view.frame.height / 10
     }
     
     override func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -146,8 +149,8 @@ class AllListsViewController: UITableViewController {
         headerView.layer.borderColor = UIColor(red: 32/255, green: 32/255, blue: 32/255, alpha: 1.0).cgColor
         headerView.layer.borderWidth = 0.3
         
-       // 2 app title displayed in header
-        headerLabel.text = "Beta: NExt Due"
+        // 2 app title displayed in header
+        headerLabel.text = "NExt Due"
         
         // 3 first confirm there are checklistitems, if none then display below
         if dataModel.nextDueItem().isEmpty {
@@ -157,7 +160,7 @@ class AllListsViewController: UITableViewController {
             // disable button that segueas to next due item to prevent crashes, and set the text color
             nextDueItemButton.isEnabled = false
             nextItemText.textColor = UIColor.lightGray
-          
+            
             // if items exist then the checklist item name and due date will be displayed
         }else{
             let formatter = DateFormatter()
@@ -176,7 +179,7 @@ class AllListsViewController: UITableViewController {
                     nextItemDueDate.textColor = UIColor.red
                 }
             }
-           
+            
             // displaying item per the above comments
             nextItemText.text = dataModel.nextDueItem().first?.text
             nextItemDueDate.text = formatter.string(from: (dataModel.nextDueItem().first?.dueDate)!)
@@ -199,21 +202,21 @@ class AllListsViewController: UITableViewController {
             
         }, completion: nil)
     }
-   
+    
     // Enables user to reorder manually the tableview cells
     override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
         let movedObject = self.dataModel.lists[sourceIndexPath.row]
         dataModel.lists.remove(at: sourceIndexPath.row)
         dataModel.lists.insert(movedObject, at: destinationIndexPath.row)
-  
-        // To check for correctness enable: 
+        
+        // To check for correctness enable:
         self.tableView.reloadData()
     }
     
     // Disables delete buttons while in edit mode
     override func tableView(_ tableView: UITableView,
                             editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
-            return.delete
+        return.delete
     }
     
     // determins if the tableview cells indent to expose the delete buttons on the left side of cell. Currently set to show
@@ -227,7 +230,7 @@ class AllListsViewController: UITableViewController {
         
         // custon cell
         let cell = tableView.dequeueReusableCell(withIdentifier: "List", for: indexPath) as! ListCell
-   
+        
         // grabs the checklist and loads cell
         let checklist = dataModel.lists[indexPath.row]
         cell.text1.text = checklist.name
@@ -243,12 +246,12 @@ class AllListsViewController: UITableViewController {
         if checklist.items.count == 0 {
             cell.text2.text = "(No Items)"
             cell.badgeView.transform = CGAffineTransform(scaleX: 0, y: 0)
-        
+            
             // app contains items but all have been set to checked
         } else if count == 0 {
             cell.text2.text = "All Done!"
             cell.badgeView.transform = CGAffineTransform(scaleX: 0, y: 0)
-        
+            
             // handles empty
         } else {
             cell.text2.text = ""
@@ -267,6 +270,38 @@ class AllListsViewController: UITableViewController {
             cell.badgeView.backgroundColor = UIColor.red
             cell.text2.text = "\(checklist.countUncheckedItems()) Remaining"
         }
+        
+        
+        // sets transform on the new created item for vissual refrence for UX by transform 1.1 then down to 1
+        
+        
+        if tableView.isEditing == false {
+            
+            if let indexOfIemEdited = indexOfIemEdited {
+                
+                if indexPath.row == indexOfIemEdited {
+                    
+                    cell.statViewBounce()
+                }
+                
+            }else {
+                
+                
+                if dataModel.lists.count > 0 && dataModel.lists.count != listCount {
+                    if indexPath.row == 0 {
+                        cell.statViewBounce()
+                    }
+                }
+                
+                
+                
+            }
+            
+       
+            
+        }
+        
+     
         
         // set badgeview size
         cell.badgeViewYContraint.constant = -cell.statView.frame.height / 2 + cell.badgeView.frame.height / 2
@@ -318,6 +353,7 @@ class AllListsViewController: UITableViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+      
         tableView.reloadData()
     }
     
@@ -334,39 +370,50 @@ class AllListsViewController: UITableViewController {
             performSegue(withIdentifier: "ShowChecklist", sender: checklist)
         }
         updateStarLabel()
+        
+        
     }
     
-}
-
-extension AllListsViewController:ListDetailViewControllerDelegate {
-
+ }
+ 
+ extension AllListsViewController:ListDetailViewControllerDelegate {
+    
     // handles the passing of edited and newly created checklist items passed back from the ListDetailViewController
     func listDetailViewControllerDidCancel(_ controller: ListDetailViewController) {
-dismiss(animated: true, completion: nil)
+        dismiss(animated: true, completion: nil)
     }
     
     func listDetailViewController(_ controller: ListDetailViewController, didFinishAdding checklist: Checklist) {
-       dataModel.lists.insert(checklist, at: 0)
+        dataModel.lists.insert(checklist, at: 0)
         
         // uncomment to sort checklist by A-Z. Currently user will have option to move manualy and list is not sorted. New items are added to the top of the list
         /*
-        dataModel.lists.append(checklist)
-        dataModel.sortChecklists()
-    */
+         dataModel.lists.append(checklist)
+         dataModel.sortChecklists()
+         */
+        
+        
+        
+        
+        
+        
         tableView.reloadData()
         dismiss(animated: true, completion: nil)
     }
     
     func listDetailViewController(_ controller: ListDetailViewController, didFinishEditing checklist: Checklist) {
-        // dataModel.sortChecklists()
+        
+        // there will always be an item to pass back
+        indexOfIemEdited = dataModel.lists.index(of: checklist)!
+        
         tableView.reloadData()
-        // collectionView.reloadData()
+        
         dismiss(animated: true, completion: nil)
     }
-}
-
+ }
+ 
  // permites the VC to segue to the last selected item once the view appears
-extension AllListsViewController: UINavigationControllerDelegate {
+ extension AllListsViewController: UINavigationControllerDelegate {
     func navigationController(_ navigationController: UINavigationController,
                               willShow viewController: UIViewController,
                               animated: Bool) {
@@ -374,7 +421,7 @@ extension AllListsViewController: UINavigationControllerDelegate {
             dataModel.indexOfSelectedChecklist = -1 // change this
         }
     }
-}
-
+ }
+ 
  
  

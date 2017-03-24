@@ -17,7 +17,7 @@ class ChecklistViewController: UITableViewController {
     
     // Outlets
     @IBOutlet var headerCell: UITableViewCell!
-    @IBOutlet weak var starImageView: UIImageView!
+ 
     @IBOutlet weak var captionView: UIView!
     @IBOutlet weak var captionViewColorView: UIImageView!
     @IBOutlet weak var itemImage: UIImageView!
@@ -158,11 +158,6 @@ class ChecklistViewController: UITableViewController {
 */
     
     // configure gradiant for cells which will aid in seperating cells vissually without having to us line seperators only
-    func configureTableViewGradiantCell(cell: UITableViewCell) {
-        
-        
-        
-    }
     
     //MARK: TableView Delegate
     

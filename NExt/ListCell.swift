@@ -17,63 +17,32 @@ class ListCell: UITableViewCell {
     @IBOutlet var itemImageView: UIImageView!
     @IBOutlet var text1: UILabel!
     @IBOutlet var text2: UILabel!
-    
-    func transformIn(delay:TimeInterval){
-        UIView.animate(withDuration: 0.5, delay: delay, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.6, options:.curveEaseIn, animations: {
-            
-            self.statView.layer.cornerRadius = self.statView.frame.width / 2
-            self.statView.transform = CGAffineTransform.identity
-            
-        }, completion: nil )
-        statView.transform = CGAffineTransform.identity
-    }
-    
-    
-    var startSize: CGFloat? {
-        didSet{
-            if let startSize = startSize {
-                statView.transform = CGAffineTransform(scaleX: startSize, y: startSize)
-            }
-        }
-    }
-    
-    var endSize: CGFloat? {
-        didSet{
-            
-            if let endSize = endSize {
-                statView.transform = CGAffineTransform(scaleX: endSize, y: endSize)
-            }
-        }
-    }
-   
     @IBOutlet weak var badgeView: UIView!
-
     @IBOutlet weak var badgeLabel: UILabel!
-  
 
-    @IBOutlet weak var nextItemText: UILabel!
-    
-    @IBOutlet weak var nextItemsDueDate: UILabel!
-    
-    @IBOutlet weak var imageWidthConstraint: NSLayoutConstraint!
-    @IBOutlet weak var badgeViewLeadingContraint: NSLayoutConstraint!
-    
      // Used to possition the badgeView to the top right corner of the Stat view
-    
     @IBOutlet weak var badgeViewYContraint: NSLayoutConstraint!
     @IBOutlet weak var badgeViewXConstraint: NSLayoutConstraint!
     
+    // applied when a new List is added or eddited, used for vissual ref to a change
+    func statViewBounce() {
+        statView.alpha = 0.0
+        
+         statView.transform = CGAffineTransform(scaleX: 1.1, y: 1.1)
+        text1.alpha = 0
+        text2.alpha = 0
+        
+        
+        UIView.animate(withDuration: 0.5, delay: 0.2, options: .curveEaseOut, animations: {
+            
+             self.statView.transform = CGAffineTransform(scaleX: 1, y: 1)
+            
+            self.statView.alpha = 1.0
+            self.text1.alpha = 1.0
+            self.text2.alpha = 1.0
+        }, completion: nil)
     
-    // Actions
-    @IBAction func buttonTap(sender: AnyObject) {
-        // Something should happen here
-        tapAction?(self)
     }
-    
-    var tapAction: ((UITableViewCell) -> Void)?
-    
-    
-    
     
     
 }
